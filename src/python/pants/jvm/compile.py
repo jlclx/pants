@@ -442,7 +442,8 @@ def classpath_dependency_requests(
             component=coarsened_dep, resolve=request.request.resolve
         )
         for coarsened_dep in request.request.component.dependencies
-        if not ignore_because_generated(coarsened_dep) and not ignore_because_file(coarsened_dep)
+        if not ignore_because_generated(coarsened_dep)
+        and not ignore_because_file(coarsened_dep)
         and not ignore_because_python_requirement(coarsened_dep)
     )
 
