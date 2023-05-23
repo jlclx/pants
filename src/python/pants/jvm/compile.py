@@ -11,6 +11,7 @@ from dataclasses import dataclass
 from enum import Enum, auto
 from typing import ClassVar, Iterable, Iterator, Sequence
 
+from pants.backend.python.target_types import PythonRequirementDependenciesField
 from pants.core.target_types import (
     FilesGeneratingSourcesField,
     FileSourceField,
@@ -432,12 +433,17 @@ def classpath_dependency_requests(
             or t.has_field(RelocatedFilesOriginalTargetsField)
         ) == len(coarsened_dep.members)
 
+    def ignore_because_python_requirement(coarsened_dep: CoarsenedTarget) -> bool:
+        # Filter out python_requirements from the classpath as javac cannot handle them.
+        return any(t.has_field(PythonRequirementDependenciesField) for t in coarsened_dep.members)
+
     return ClasspathEntryRequests(
         classpath_entry_request.for_targets(
             component=coarsened_dep, resolve=request.request.resolve
         )
         for coarsened_dep in request.request.component.dependencies
         if not ignore_because_generated(coarsened_dep) and not ignore_because_file(coarsened_dep)
+        and not ignore_because_python_requirement(coarsened_dep)
     )
 
 
